@@ -14,7 +14,7 @@ import { VENUES } from "@/lib/venues"
 const MapComponent = dynamic(() => import("./map-component"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-screen flex items-center justify-center bg-slate-100">
+    <div className="w-full h-dvh flex items-center justify-center bg-slate-100">
       <p className="text-slate-500">Loading Map...</p>
     </div>
   ),
@@ -91,7 +91,8 @@ export default function MapView() {
   const isVenueLocked = (venueId: string) => !userVisits.has(venueId)
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    // Changed h-screen to h-dvh for better mobile browser support
+    <div className="relative w-full h-dvh overflow-hidden">
       <MapComponent 
         venues={VENUES} 
         userVisits={userVisits} 
@@ -109,8 +110,7 @@ export default function MapView() {
         </div>
       )}
 
-      {/* QR Scanner Button - Only show if NO venue is selected, to avoid clutter? 
-          Or keep it always. User didn't ask to remove it. */}
+      {/* QR Scanner Button */}
       {!selectedVenue && (
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1000]">
           <Button

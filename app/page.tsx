@@ -9,7 +9,7 @@ export default function Home() {
   const [showPassport, setShowPassport] = useState(false)
 
   return (
-    <main className="w-full h-screen overflow-hidden">
+    <main className="w-full h-dvh overflow-hidden">
       <MapView />
 
       <div className="absolute bottom-6 right-6 z-30">
