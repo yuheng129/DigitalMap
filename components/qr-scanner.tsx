@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 
 interface QRScannerProps {
@@ -13,138 +13,126 @@ export default function QRScanner({ onClose, onScan }: QRScannerProps) {
   const [error, setError] = useState<string | null>(null)
   const [isReady, setIsReady] = useState(false)
 
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        setError(null)
-        console.log("Requesting camera permissions...");
+  const startCamera = async () => {
+    try {
+      setError(null)
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "environment"
-          },
-        })
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      })
 
-        console.log("Camera access granted");
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-
-          // Wait for video to actually be ready
-          videoRef.current.onloadedmetadata = () => {
-            console.log("Video metadata loaded");
-            videoRef.current?.play().then(() => {
-              console.log("Video playing");
-              setIsReady(true)
-            }).catch(e => {
-              console.error("Play error:", e);
-              setError(`Playback Error: ${e.message}`);
-            });
-          };
-        }
-      } catch (err: any) {
-        console.error("Camera error:", err)
-        // Show the specific error name and message to help debugging
-        setError(`${err.name}: ${err.message || "Unknown error"}`)
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+        setIsReady(true)
       }
-    }
-
-    startCamera()
-
-    return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks()
-        tracks.forEach((track) => track.stop())
-      }
-    }
-  }, [])
-
-  const handleManualInput = () => {
-    const url = prompt("Enter the venue URL from the QR code:")
-    if (url) {
-      onScan(url)
+    } catch (err: any) {
+      setError(`${err.name}: ${err.message}`)
     }
   }
 
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject as MediaStream | null
+    stream?.getTracks().forEach(track => track.stop())
+  }
+
+  const handleClose = () => {
+    stopCamera()
+    onClose()
+  }
+
+  const handleManualInput = () => {
+    const url = prompt("Enter the venue URL from the QR code:")
+    if (url) onScan(url)
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-[2000] p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[2000] p-4">
       <div className="w-full max-w-sm bg-[#f5f1e8] rounded-2xl overflow-hidden shadow-2xl border-4 border-[#3a2515]">
 
-        {/* Header decoration */}
         <div className="bg-[#3a2515] p-3 text-center border-b-2 border-[#c4a57b]">
-          <h2 className="text-[#f5ead6] font-bold text-lg tracking-widest" style={{ fontFamily: "Georgia, serif" }}>
+          <h2 className="text-[#f5ead6] font-bold text-lg tracking-widest">
             SCANNER
           </h2>
         </div>
 
-        <div className="relative w-full aspect-square bg-black overflow-hidden relative">
-          {/* Decorative corner accents for camera view */}
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 border-[10px] border-[#f5f1e8]/10"></div>
+        <div className="relative w-full aspect-square bg-black overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+          />
 
-          {isReady && <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />}
           {!isReady && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-[#f5ead6]">Initializing lens...</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 gap-4">
+              <p className="text-[#f5ead6]">Camera not started</p>
+              <Button
+                className="bg-[#3a2515] text-[#f5ead6]"
+                onClick={startCamera}
+              >
+                Scan QR
+              </Button>
             </div>
           )}
-
-          {/* QR Frame Overlay - Vintage Style */}
-          <div className="absolute inset-12 border-2 border-[#c4a57b] rounded-lg pointer-events-none opacity-80">
-            {/* Corners */}
-            <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-[#c4a57b]" />
-            <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-[#c4a57b]" />
-            <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-[#c4a57b]" />
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-[#c4a57b]" />
-
-            {/* Center crosshair */}
-            <div className="absolute top-1/2 left-1/2 w-4 h-[2px] bg-[#c4a57b]/50 -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute top-1/2 left-1/2 w-[2px] h-4 bg-[#c4a57b]/50 -translate-x-1/2 -translate-y-1/2"></div>
-          </div>
-
-          {/* Scanline animation */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
-            <div className="w-full h-[2px] bg-[#c4a57b] absolute top-0 animate-[scan_2s_ease-in-out_infinite]"></div>
-          </div>
         </div>
 
         {error && (
-          <div className="bg-red-100 text-red-900 px-4 py-4 text-sm font-bold border-b border-red-200 break-words">
-            <p>CAMERA ERROR:</p>
-            <p className="font-mono text-xs mt-1">{error}</p>
-            <p className="text-xs font-normal mt-2 text-red-700">
-              Please ensure you are using HTTPS and have granted camera permissions.
-            </p>
+          <div className="bg-red-50 text-red-900 border-b border-red-200 p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">🔒</div>
+              <div className="space-y-2">
+                <h3 className="font-bold text-sm uppercase tracking-wider">Camera Access Blocked</h3>
+
+                {error.includes("NotAllowedError") || error.includes("Permission denied") ? (
+                  <div className="text-sm text-red-800 space-y-2">
+                    <p><strong>To fix this on mobile:</strong></p>
+                    <ol className="list-decimal pl-4 space-y-1">
+                      <li>Tap the <strong>Aa</strong> or <strong>🔒 Lock</strong> icon in your address bar.</li>
+                      <li>Select <strong>Website Settings</strong> or <strong>Permissions</strong>.</li>
+                      <li>Set Camera to <strong>Allow</strong> (or "Ask").</li>
+                      <li>Refresh the page.</li>
+                    </ol>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="font-mono text-xs break-all">{error}</p>
+                    <p className="text-xs">Ensure you are using the HTTPS link.</p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-2 bg-white border-red-200 hover:bg-red-50 text-red-900"
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="p-6 space-y-4 bg-[#f5f1e8]">
-          <p className="text-sm text-[#3a2515]/70 text-center font-serif italic">
-            Align the marker within the frame to capture.
-          </p>
+        <div className="p-6 space-y-4">
           <div className="flex gap-3">
             <Button
               variant="outline"
-              className="flex-1 bg-transparent border-[#c4a57b] text-[#3a2515] hover:bg-[#c4a57b]/10 hover:text-[#3a2515] font-serif"
+              className="flex-1"
               onClick={handleManualInput}
             >
               Manual Entry
             </Button>
             <Button
-              className="flex-1 bg-[#3a2515] text-[#f5ead6] hover:bg-[#2c1810] font-serif tracking-wide border border-[#c4a57b]"
-              onClick={onClose}
+              className="flex-1 bg-[#3a2515] text-[#f5ead6]"
+              onClick={handleClose}
             >
               Abort
             </Button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes scan {
-          0% { top: 10%; opacity: 0; }
-          50% { opacity: 1; }
-          100% { top: 90%; opacity: 0; }
-        }
-      `}</style>
     </div>
   )
 }
