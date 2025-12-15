@@ -61,15 +61,14 @@ export default function PassportView({ onClose }: PassportViewProps) {
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[2000] p-4 backdrop-blur-sm">
       {/* Passport Container with book-like perspective */}
       <div
-        className={`w-full max-w-4xl h-[90vh] md:h-auto md:aspect-[3/2] transition-all duration-700 transform ${
-          isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0"
-        }`}
+        className={`w-full max-w-4xl h-[90vh] md:h-auto md:aspect-[3/2] transition-all duration-700 transform ${isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
         style={{
           perspective: "1000px",
         }}
       >
         <div className="bg-white rounded-lg shadow-2xl overflow-hidden h-full flex flex-col md:grid md:grid-cols-2">
-          
+
           {/* Left page - Cover */}
           {/* Hidden on very small screens if we want to focus on content, or reduced size? 
               For now keeping it but as top section on mobile */}
@@ -155,11 +154,10 @@ export default function PassportView({ onClose }: PassportViewProps) {
                           className={`relative mb-2 transition-all duration-500 ${isCollected ? "scale-100" : "scale-90 opacity-50"}`}
                         >
                           <div
-                            className={`w-20 h-20 md:w-24 md:h-24 border-2 flex items-center justify-center rounded-lg relative ${
-                              isCollected
+                            className={`w-20 h-20 md:w-24 md:h-24 border-2 flex items-center justify-center rounded-lg relative ${isCollected
                                 ? "bg-gradient-to-br from-passport-stamp to-yellow-50 border-passport-accent shadow-lg"
                                 : "bg-passport-page/50 border-passport-footer/20"
-                            }`}
+                              }`}
                             style={{
                               transform: isCollected ? `rotate(${-3 + Math.random() * 6}deg)` : "rotate(0deg)",
                             }}
@@ -170,8 +168,16 @@ export default function PassportView({ onClose }: PassportViewProps) {
                             )}
 
                             {/* Stamp icon */}
-                            <div className="flex flex-col items-center justify-center">
-                              <span className="text-3xl md:text-4xl">{icon}</span>
+                            <div className="flex flex-col items-center justify-center p-2">
+                              {venue.icon_url ? (
+                                <img
+                                  src={venue.icon_url}
+                                  alt={venue.name}
+                                  className={`w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-md ${!isCollected && "grayscale contrast-125"}`}
+                                />
+                              ) : (
+                                <span className="text-3xl md:text-4xl">{icon}</span>
+                              )}
                               {isCollected && <span className="text-sm font-bold text-passport-accent mt-1">✓</span>}
                             </div>
                           </div>
@@ -186,9 +192,8 @@ export default function PassportView({ onClose }: PassportViewProps) {
 
                         {/* Venue name */}
                         <p
-                          className={`text-[10px] md:text-xs font-semibold text-center mt-6 md:mt-8 transition-all px-1 ${
-                            isCollected ? "text-passport-footer" : "text-passport-footer/40"
-                          }`}
+                          className={`text-[10px] md:text-xs font-semibold text-center mt-6 md:mt-8 transition-all px-1 ${isCollected ? "text-passport-footer" : "text-passport-footer/40"
+                            }`}
                         >
                           {venue.name}
                         </p>
@@ -199,14 +204,14 @@ export default function PassportView({ onClose }: PassportViewProps) {
               </div>
             )}
 
-             {/* Bottom footer bar - Mobile only inside the card, desktop had separate footer? 
+            {/* Bottom footer bar - Mobile only inside the card, desktop had separate footer? 
                  Actually keeping the footer inside the right page flow or at bottom of modal?
                  Original code had a footer bar spanning both cols which is hard in flex-col.
                  Moving Close button to be inside this column for mobile, or fixed at bottom. */}
           </div>
-          
-           {/* Bottom footer bar - Sticky at bottom */}
-           <div className="bg-passport-footer px-4 py-3 md:px-8 md:py-4 flex justify-between items-center border-t border-passport-accent/20 shrink-0 md:col-span-2">
+
+          {/* Bottom footer bar - Sticky at bottom */}
+          <div className="bg-passport-footer px-4 py-3 md:px-8 md:py-4 flex justify-between items-center border-t border-passport-accent/20 shrink-0 md:col-span-2">
             <p className="text-[10px] md:text-xs text-passport-text/60 tracking-wider" style={{ fontFamily: "Georgia, serif" }}>
               {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>

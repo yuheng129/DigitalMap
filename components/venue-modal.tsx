@@ -50,16 +50,16 @@ export default function VenueModal({ venue, onClose, onClaim, isAlreadyClaimed }
           {/* Venue Icon */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-               {venue.icon_url ? (
+              {venue.icon_url ? (
                 <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shrink-0">
                   <img src={venue.icon_url || "/placeholder.svg"} alt={venue.name} className="w-8 h-8" />
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                   <span className="text-2xl">📍</span>
+                  <span className="text-2xl">📍</span>
                 </div>
               )}
-              
+
               <div>
                 <h2 className="text-xl font-bold text-foreground leading-tight">{venue.name}</h2>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -67,19 +67,21 @@ export default function VenueModal({ venue, onClose, onClaim, isAlreadyClaimed }
                 </p>
               </div>
             </div>
-            
+
             <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 -mt-2 text-slate-400" onClick={onClose}>
-               <span className="sr-only">Close</span>
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span className="sr-only">Close</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </Button>
           </div>
 
           <div className="flex gap-2 pt-2">
             <Button
               className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={isAlreadyClaimed ? handleVisitLandingPage : handleClaimStamp}
+              onClick={isAlreadyClaimed ? handleVisitLandingPage : undefined}
+              disabled={!isAlreadyClaimed}
+              className={`flex-1 ${!isAlreadyClaimed ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
             >
-              {isAlreadyClaimed ? "Visit Landing Page" : "Claim Stamp"}
+              {isAlreadyClaimed ? "Visit Landing Page" : "Scan QR to Unlock"}
             </Button>
           </div>
         </div>

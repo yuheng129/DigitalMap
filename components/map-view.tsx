@@ -22,6 +22,7 @@ const MapComponent = dynamic(() => import("./map-component"), {
 
 export default function MapView() {
   const userId = useUserId()
+  const [venues, setVenues] = useState<Venue[]>([])
   const [userVisits, setUserVisits] = useState<Set<string>>(new Set())
   const [showScanner, setShowScanner] = useState(false)
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null)
@@ -30,35 +31,41 @@ export default function MapView() {
   const supabase = createClient()
 
   useEffect(() => {
-    // We only need to load user visits from Supabase now, venues are static
-    const loadUserVisits = async () => {
-      if (!userId) return
-
+    const loadData = async () => {
       try {
-        const { data: visitsData, error: visitsError } = await supabase
-          .from("user_visits")
-          .select("venue_id")
-          .eq("user_id", userId)
+        // Fetch venues
+        const { data: venuesData } = await supabase.from("venues").select("*")
+        if (venuesData) {
+          setVenues(venuesData)
+        }
 
-        if (!visitsError && visitsData) {
-          setUserVisits(new Set(visitsData.map((v) => v.venue_id)))
+        // Fetch user visits
+        if (userId) {
+          const { data: visitsData, error: visitsError } = await supabase
+            .from("user_visits")
+            .select("venue_id")
+            .eq("user_id", userId)
+
+          if (!visitsError && visitsData) {
+            setUserVisits(new Set(visitsData.map((v) => v.venue_id)))
+          }
         }
       } catch (err) {
-        console.error("Error loading visits:", err)
-        // Non-critical error, we can still show the map
+        console.error("Error loading data:", err)
       }
     }
 
-    loadUserVisits()
+    loadData()
   }, [userId])
 
   const handleQRScanned = async (url: string) => {
-    const venue = VENUES.find((v) => v.landing_url === url)
+    const venue = venues.find((v) => v.landing_url === url)
     if (venue) {
-      setSelectedVenue(venue)
+      // Direct claim and redirect logic
+      await handleClaimStamp(venue)
       setShowScanner(false)
     } else {
-      setError("Venue not found")
+      setError("Venue not found in our database")
     }
   }
 
@@ -93,10 +100,10 @@ export default function MapView() {
   return (
     // Changed h-screen to h-dvh for better mobile browser support
     <div className="relative w-full h-dvh overflow-hidden">
-      <MapComponent 
-        venues={VENUES} 
-        userVisits={userVisits} 
-        onVenueClick={setSelectedVenue} 
+      <MapComponent
+        venues={venues.length > 0 ? venues : VENUES} // Fallback to types if needed or just venues
+        userVisits={userVisits}
+        onVenueClick={setSelectedVenue}
         // Allow closing the modal by clicking on the map
         onMapClick={() => setSelectedVenue(null)}
       />
