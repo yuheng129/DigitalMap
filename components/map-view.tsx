@@ -87,7 +87,7 @@ export default function MapView() {
       } else {
         setUserVisits((prev) => new Set([...prev, venue.id]))
         setSelectedVenue(null)
-        window.open(venue.landing_url, "_blank")
+        window.location.assign(venue.landing_url)
       }
     } catch (err) {
       console.error("Error claiming stamp:", err)

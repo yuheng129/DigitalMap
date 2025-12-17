@@ -23,7 +23,7 @@ export default function VenueModal({ venue, onClose, onClaim, isAlreadyClaimed }
 
   const handleAnimationComplete = () => {
     if (venue.landing_url) {
-      window.open(venue.landing_url, "_blank", "noopener,noreferrer")
+      window.location.assign(venue.landing_url)
     }
     // Call original onClaim to save to database
     onClaim()
@@ -32,7 +32,7 @@ export default function VenueModal({ venue, onClose, onClaim, isAlreadyClaimed }
 
   const handleVisitLandingPage = () => {
     if (venue.landing_url) {
-      window.open(venue.landing_url, "_blank", "noopener,noreferrer")
+      window.location.assign(venue.landing_url)
     }
     onClose()
   }
@@ -76,7 +76,6 @@ export default function VenueModal({ venue, onClose, onClaim, isAlreadyClaimed }
 
           <div className="flex gap-2 pt-2">
             <Button
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={isAlreadyClaimed ? handleVisitLandingPage : undefined}
               disabled={!isAlreadyClaimed}
               className={`flex-1 ${!isAlreadyClaimed ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
